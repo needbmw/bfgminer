@@ -72,32 +72,19 @@ static uint32_t bitfury_checkNonce(struct work *work, uint32_t nonce)
 	applog(LOG_INFO, "INFO: bitfury_checkNonce");
 }
 
-#if 0
 static int bitfury_submitNonce(struct thr_info *thr, struct bitfury_device *device, struct timeval *now, struct work *owork, uint32_t nonce)
 {
-	int i;
-	int is_dupe = 0;
+	if(!submit_nonce(thr, owork, nonce))
+		return 0;
+	device->nonces[device->current_nonce++] = nonce;
+	if(device->current_nonce > 32)
+		device->current_nonce = 0;
+	device->stat_ts[device->stat_counter++] = now->tv_sec;
+	if (device->stat_counter == BITFURY_STAT_N)
+		device->stat_counter = 0;
 
-	for(i=0; i<32; i++) {
-		if(device->nonces[i] == nonce) {
-//			is_dupe = 1;
-			break;
-		}
-	}
-
-	if(!is_dupe) {
-		submit_nonce(thr, owork, nonce);
-		device->nonces[device->current_nonce++] = nonce;
-		if(device->current_nonce > 32)
-			device->current_nonce = 0;
-		device->stat_ts[device->stat_counter++] = now->tv_sec;
-		if (device->stat_counter == BITFURY_STAT_N)
-			device->stat_counter = 0;
-	}
-
-	return(!is_dupe);
+	return 1;
 }
-#endif
 
 static int64_t bitfury_scanHash(struct thr_info *thr)
 {
@@ -158,25 +145,19 @@ static int64_t bitfury_scanHash(struct thr_info *thr)
 			struct work *o2work = dev->o2work;
 			for (j = dev->results_n-1; j >= 0; j--) {
 				if (owork) {
-//					nonces_cnt += bitfury_submitNonce(thr, dev, &now, owork, bswap_32(res[j]));
-					submit_nonce (thr, owork, bswap_32(res[j]));
-					nonces_cnt++;
+					nonces_cnt += bitfury_submitNonce(thr, dev, &now, owork, bswap_32(res[j]));
 				}
 			}
 			dev->results_n = 0;
 			dev->job_switched = 0;
 			if ((dev->old_num > 0) && o2work)
 				for(j = 0; j < dev->old_num; j++) {
-//					nonces_cnt += bitfury_submitNonce(thr, dev, &now, o2work, bswap_32(dev->old_nonce[j]));
-					submit_nonce (thr, o2work, bswap_32(dev->old_nonce[j]));
-					nonces_cnt++;
+					nonces_cnt += bitfury_submitNonce(thr, dev, &now, o2work, bswap_32(dev->old_nonce[j]));
 				}
 
 			if (dev->future_num > 0)
 				for(j=0; j < dev->future_num; j++) {
-//				        nonces_cnt += bitfury_submitNonce(thr, dev, &now, work, bswap_32(dev->future_nonce[j]));
-					submit_nonce (thr, work, bswap_32(dev->future_nonce[j]));
-					nonces_cnt++;
+				        nonces_cnt += bitfury_submitNonce(thr, dev, &now, work, bswap_32(dev->future_nonce[j]));
 				}
 
 			if (o2work)
