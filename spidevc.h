@@ -45,5 +45,6 @@ void spi_emit_nop(int n);
    len is length in _bytes_, should be 4 to 128 and be multiple of 4, as smallest
    transmission quantum is 32 bits */
 void spi_emit_data(unsigned addr, const char *buf, unsigned len);
+int spi_reset(int a);
 
 #endif
