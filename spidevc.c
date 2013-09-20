@@ -39,7 +39,7 @@
 static volatile unsigned *gpio;
 static int fd;
 
-static int mode = 0, bits = 8, speed = 1750000;
+static int mode = 0, bits = 8, speed = 2000000;
 
 
 void spi_init(void)
@@ -58,7 +58,7 @@ void spi_init(void)
 		perror("FATAL, modprobe spidev failed (must be root)");
 		exit(1);
 	}
-	if(system("modprobe spi-bcm2708")) {
+	if(system("modprobe spi-bcm2708 processmode=2")) {
 		perror("FATAL, modprobe spi-bcm2708 failed (must be root)");
 		exit(1);
 	}
@@ -158,7 +158,7 @@ int spi_txrx(const char *wrbuf, char *rdbuf, int bufsz)
 
 	memset(&tr,0,sizeof(tr));
 
-//	spi_reset(10);
+	spi_reset(10);
 
 	rv = 0;
 	while (bufsz >= 4096) {
@@ -190,7 +190,7 @@ int spi_txrx(const char *wrbuf, char *rdbuf, int bufsz)
 		}
         }
 
-//	spi_reset(4096);
+	spi_reset(4096);
 
 	return 0;
 }

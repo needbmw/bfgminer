@@ -500,12 +500,14 @@ void libbitfury_sendHashData(struct thr_info *thr, struct bitfury_device *bf, in
 			ms3_compute(atrvec);
 
 			/* Programming next value */
+			tm_i2c_set_oe(slot);
 			spi_clear_buf(); spi_emit_break();
 			spi_emit_fasync(chip);
 			spi_emit_data(0x3000, (void*)&atrvec[0], 19*4);
 
 			spi_txrx(spi_gettxbuf(), spi_getrxbuf(), spi_getbufsz());
 			memcpy(newbuf, spi_getrxbuf() + 4 + chip, 17*4);
+			tm_i2c_clear_oe(slot);
 
 			d->job_switched = (newbuf[16] != oldbuf[16]);
 
