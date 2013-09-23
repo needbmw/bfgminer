@@ -89,5 +89,8 @@ struct timespec t_diff(struct timespec start, struct timespec end);
 int libbitfury_detectChips(struct bitfury_device *devices);
 int libbitfury_shutdownChips(struct bitfury_device *devices, int chip_n);
 void send_reinit(int slot, int chip_n, int n);
+void send_freq(int slot, int chip_n, int bits);
+void send_shutdown(int slot, int chip_n);
+
 
 #endif /* __LIBBITFURY_H__ */

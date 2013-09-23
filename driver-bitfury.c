@@ -100,23 +100,28 @@ static int64_t bitfury_scanHash(struct thr_info *thr)
 	static time_t long_out_t;
 	int long_long_stat = 60 * 30;
 	static time_t long_long_out_t;
-	static int first = 0; //TODO Move to detect()
+	static int first = 1; //TODO Move to detect()
 	int i;
 	int nonces_cnt;
+	struct timespec td;
+	struct timespec ts_now;
 
 	devices = thr->cgpu->devices;
 	chip_n = thr->cgpu->chip_n;
 
-	if (!first) {
+	if (first) {
+		clock_gettime(CLOCK_REALTIME, &ts_now);
+
 		for (i = 0; i < chip_n; i++) {
 			devices[i].osc6_bits = devices[i].osc6_bits_setpoint;
 			devices[i].osc6_req = devices[i].osc6_bits_setpoint;
 		}
 		for (i = 0; i < chip_n; i++) {
+			devices[i].ts1 = ts_now;
 			send_reinit(devices[i].slot, devices[i].fasync, devices[i].osc6_bits);
 		}
 	}
-	first = 1;
+	first = 0;
 
 	for (chip = 0; chip < chip_n; chip++) {
 		dev = &devices[chip];
@@ -133,6 +138,8 @@ static int64_t bitfury_scanHash(struct thr_info *thr)
 	libbitfury_sendHashData(thr, devices, chip_n);
 
 	cgtime(&now);
+	clock_gettime(CLOCK_REALTIME, &ts_now);
+
 	chip = 0;
 	for (;chip < chip_n; chip++) {
 		nonces_cnt = 0;
@@ -169,11 +176,27 @@ static int64_t bitfury_scanHash(struct thr_info *thr)
 			hashes += 0xffffffffull * nonces_cnt;
 			dev->matching_work += nonces_cnt;
 		}
+
+		td = t_diff(dev->ts1, ts_now);
+		if(td.tv_sec > BITFURY_API_STATS) {
+			if(calc_stat(dev->stat_ts, BITFURY_API_STATS, now) < 75) { // ~1.079 Gh/s @ 300 seconds
+				send_shutdown(dev->slot, dev->fasync);
+				cgsleep_ms(50);
+				send_reinit(dev->slot, dev->fasync, dev->osc6_bits);
+				cgsleep_ms(5);
+				send_freq(dev->slot, dev->fasync, dev->osc6_bits - 1);
+				cgsleep_ms(5);
+				send_freq(dev->slot, dev->fasync, dev->osc6_bits);
+				applog(LOG_WARNING, "Chip %d:%d clock reinit to %d bits!", dev->slot, dev->fasync, dev->osc6_bits);
+			}
+			dev->ts1 = ts_now;
+		}
 	}
 //	cgsleep_ms(1);
 
 	return hashes;
 }
+
 
 int calc_stat(time_t * stat_ts, time_t stat, struct timeval now) {
 	int j;

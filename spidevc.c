@@ -39,7 +39,7 @@
 static volatile unsigned *gpio;
 static int fd;
 
-static int mode = 0, bits = 8, speed = 2000000;
+static int mode = 0, bits = 8, speed = 4000000;
 
 
 void spi_init(void)
@@ -58,7 +58,7 @@ void spi_init(void)
 		perror("FATAL, modprobe spidev failed (must be root)");
 		exit(1);
 	}
-	if(system("modprobe spi-bcm2708 processmode=2")) {
+	if(system("modprobe spi-bcm2708")) {
 		perror("FATAL, modprobe spi-bcm2708 failed (must be root)");
 		exit(1);
 	}
