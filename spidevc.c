@@ -46,19 +46,19 @@ void spi_init(void)
 {
 	int mem_fd;
 
-	if(system("modprobe i2c-dev")) {
+	if(system("/sbin/modprobe i2c-dev")) {
 		perror("FATAL, modprobe i2c-dev failed (must be root)");
 		exit(1);
 	}
-	if(system("modprobe i2c-bcm2708")) {
+	if(system("/sbin/modprobe i2c-bcm2708")) {
 		perror("FATAL, modprobe i2c-bcm2708 failed (must be root)");
 		exit(1);
 	}
-	if(system("modprobe spidev")) {
+	if(system("/sbin/modprobe spidev")) {
 		perror("FATAL, modprobe spidev failed (must be root)");
 		exit(1);
 	}
-	if(system("modprobe spi-bcm2708")) {
+	if(system("/sbin/modprobe spi-bcm2708")) {
 		perror("FATAL, modprobe spi-bcm2708 failed (must be root)");
 		exit(1);
 	}
