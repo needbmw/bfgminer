@@ -64,7 +64,7 @@ void spi_init(void)
 	}
 	mem_fd = open("/dev/mem",O_RDWR|O_SYNC);
 	if (mem_fd < 0) {
-		perror("FATAL, /dev/mem trouble (must be roor)");
+		perror("FATAL, /dev/mem trouble (must be root)");
 		exit(1);
 	}
 	gpio = mmap(0,4096,PROT_READ|PROT_WRITE,MAP_SHARED,mem_fd,0x20200000);

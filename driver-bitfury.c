@@ -105,6 +105,7 @@ static int64_t bitfury_scanHash(struct thr_info *thr)
 	int nonces_cnt;
 	struct timespec td;
 	struct timespec ts_now;
+	static int reinit_cnt = 0;
 
 	devices = thr->cgpu->devices;
 	chip_n = thr->cgpu->chip_n;
@@ -192,7 +193,7 @@ static int64_t bitfury_scanHash(struct thr_info *thr)
 			dev->ts1 = ts_now;
 		}
 	}
-//	cgsleep_ms(1);
+//	cgsleep_ms(10);
 
 	return hashes;
 }
@@ -202,7 +203,7 @@ int calc_stat(time_t * stat_ts, time_t stat, struct timeval now) {
 	int j;
 	int shares_found = 0;
 	for(j = 0; j < BITFURY_STAT_N; j++) {
-		if (now.tv_sec - stat_ts[j] <= stat) {
+		if (now.tv_sec - stat_ts[j] < stat) {
 			shares_found++;
 		}
 	}
