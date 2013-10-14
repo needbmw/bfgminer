@@ -6,7 +6,18 @@
 #include <linux/i2c-dev.h>
 
 #include "logging.h"
+#include "spidevc.h"
 #include "tm_i2c.h"
+
+#define INP_GPIO(g) *(gpio+((g)/10)) &= ~(7<<(((g)%10)*3))
+#define OUT_GPIO(g) *(gpio+((g)/10)) |=  (1<<(((g)%10)*3))
+#define SET_GPIO_ALT(g,a) *(gpio+(((g)/10))) |= (((a)<=3?(a)+4:(a)==4?3:2)<<(((g)%10)*3))
+
+#define GPIO_SET *(gpio+7)  // sets   bits which are 1 ignores bits which are 0
+#define GPIO_CLR *(gpio+10) // clears bits which are 1 ignores bits which are 0
+
+
+static int gpio_map[32] = { 2, 3, 4, 14, 15, 17, 18, 27, 22, 23, 24, 25, 8, 7};
 
 static int tm_i2c_fd;
 
@@ -21,10 +32,24 @@ float tm_i2c_Data2Core(unsigned int ans) {
 }
 
 int tm_i2c_init() {
+	int i;
+
+	spi_init();
+
 	if ((tm_i2c_fd = open("/dev/i2c-1", O_RDWR)) < 0)
-		return 1;
-	else
-		return 0;
+		;
+//		return 1;
+//	else
+//		return 0;
+
+	for(i=0; i<14; i++) {
+		gpio_inp(gpio_map[i]);
+		gpio_out(gpio_map[i]);
+//		gpio_set_alt(gpio_map[i], 0);
+		gpio_set(gpio_map[i]);
+	}
+
+	return 0;
 }
 
 void tm_i2c_close() {
@@ -96,13 +121,27 @@ float tm_i2c_gettemp(unsigned char slot) {
 }
 
 void tm_i2c_set_oe(unsigned char slot) {
+
 	if (slot < 0 || slot > 31) return;
+#if 0
 	tm_i2c_req(tm_i2c_fd, (TM_ADDR >> 1) + slot, TM_SET_OE, 0);
+#else
+	gpio_inp(gpio_map[slot]);
+	gpio_out(gpio_map[slot]);
+	gpio_clr(gpio_map[slot]);
+#endif
 }
 
 void tm_i2c_clear_oe(unsigned char slot) {
+
 	if (slot < 0 || slot > 31) return;
+#if 0
 	tm_i2c_req(tm_i2c_fd, (TM_ADDR >> 1) + slot, TM_SET_OE, 1);
+#else
+	gpio_inp(gpio_map[slot]);
+	gpio_out(gpio_map[slot]);
+	gpio_set(gpio_map[slot]);
+#endif
 }
 
 unsigned char tm_i2c_slot2addr(unsigned char slot) {

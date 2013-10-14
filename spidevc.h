@@ -46,5 +46,10 @@ void spi_emit_nop(int n);
    transmission quantum is 32 bits */
 void spi_emit_data(unsigned addr, const char *buf, unsigned len);
 int spi_reset(int a);
+void gpio_set(int n);
+void gpio_clr(int n);
+void gpio_set_alt(int n, int val);
+void gpio_inp(int n);
+void gpio_out(int n);
 
 #endif

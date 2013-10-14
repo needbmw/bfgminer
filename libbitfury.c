@@ -352,7 +352,8 @@ int libbitfury_detectChips(struct bitfury_device *devices) {
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t1);
 	for (i = 0; i < BITFURY_MAXBANKS; i++) {
 		int slot_detected = tm_i2c_detect(i) != -1;
-		slot_on[i] = slot_detected;
+//		slot_on[i] = slot_detected;
+		slot_on[i] = 1;
 		tm_i2c_clear_oe(i);
 		cgsleep_ms(1);
 	}

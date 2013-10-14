@@ -39,7 +39,7 @@
 static volatile unsigned *gpio;
 static int fd;
 
-static int mode = 0, bits = 8, speed = 4000000;
+static int mode = 0, bits = 8, speed = 500000;
 
 
 void spi_init(void)
@@ -119,6 +119,31 @@ void spi_init(void)
 
 #define GPIO_SET *(gpio+7)  // sets   bits which are 1 ignores bits which are 0
 #define GPIO_CLR *(gpio+10) // clears bits which are 1 ignores bits which are 0
+
+void gpio_inp(int n)
+{
+	INP_GPIO(n);
+}
+
+void gpio_out(int n)
+{
+	OUT_GPIO(n);
+}
+
+void gpio_set(int n)
+{
+	GPIO_SET = (1 << (n));
+}
+
+void gpio_clr(int n)
+{
+	GPIO_CLR = (1 << (n));
+}
+
+void gpio_set_alt(int n, int val)
+{
+	SET_GPIO_ALT(n, val);
+}
 
 // Bit-banging reset, to reset more chips in chain - toggle for longer period... Each 3 reset cycles reset first chip in chain
 int spi_reset(int a)
