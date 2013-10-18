@@ -179,16 +179,18 @@ static int64_t bitfury_scanHash(struct thr_info *thr)
 		}
 
 		td = t_diff(dev->ts1, ts_now);
-		if(td.tv_sec > 60) {
+		if(td.tv_sec > 30) {
 //			if(calc_stat(dev->stat_ts, BITFURY_API_STATS, now) < 75) { // ~1.079 Gh/s @ 300 seconds
 				send_shutdown(dev->slot, dev->fasync);
-				cgsleep_ms(5);
+				cgsleep_ms(50);
 				send_reinit(dev->slot, dev->fasync, dev->osc6_bits);
 				cgsleep_ms(5);
 				send_freq(dev->slot, dev->fasync, dev->osc6_bits - 1);
 				cgsleep_ms(5);
 				send_freq(dev->slot, dev->fasync, dev->osc6_bits);
 //				applog(LOG_WARNING, "Chip %d:%d clock reinit to %d bits!", dev->slot, dev->fasync, dev->osc6_bits);
+				if(chip == 0)
+					applog(LOG_WARNING, "Chips reinit to %d bits!", dev->osc6_bits);
 //			}
 			dev->ts1 = ts_now;
 		}

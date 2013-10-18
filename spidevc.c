@@ -39,7 +39,7 @@
 static volatile unsigned *gpio;
 static int fd;
 
-static int mode = 0, bits = 8, speed = 500000;
+static int mode = 0, bits = 8, speed = 1000000;
 
 
 void spi_init(void)
