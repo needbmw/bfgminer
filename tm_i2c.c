@@ -121,6 +121,7 @@ float tm_i2c_gettemp(unsigned char slot) {
 }
 
 void tm_i2c_set_oe(unsigned char slot) {
+	int cnt, a=2;
 
 	if (slot < 0 || slot > 31) return;
 #if 0
@@ -129,18 +130,24 @@ void tm_i2c_set_oe(unsigned char slot) {
 	gpio_inp(gpio_map[slot]);
 	gpio_out(gpio_map[slot]);
 	gpio_clr(gpio_map[slot]);
+//	for (cnt=0; cnt<1000000; cnt++)
+//		a = a*a;
+//	spi_reset(1024);
 #endif
 }
 
 void tm_i2c_clear_oe(unsigned char slot) {
+	int i;
 
 	if (slot < 0 || slot > 31) return;
 #if 0
 	tm_i2c_req(tm_i2c_fd, (TM_ADDR >> 1) + slot, TM_SET_OE, 1);
 #else
-	gpio_inp(gpio_map[slot]);
-	gpio_out(gpio_map[slot]);
-	gpio_set(gpio_map[slot]);
+	for(i=0; i<14; i++) {
+		gpio_inp(gpio_map[i]);
+		gpio_out(gpio_map[i]);
+		gpio_set(gpio_map[i]);
+	}
 #endif
 }
 

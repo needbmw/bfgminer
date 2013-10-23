@@ -221,6 +221,7 @@ void send_reinit(int slot, int chip_n, int n) {
 	send_conf();
 	send_init();
 	tm_i2c_set_oe(slot);
+	spi_reset(1024);
 	spi_txrx(spi_gettxbuf(), spi_getrxbuf(), spi_getbufsz());
 	tm_i2c_clear_oe(slot);
 }
@@ -523,6 +524,7 @@ void libbitfury_sendHashData(struct thr_info *thr, struct bitfury_device *bf, in
 	static unsigned second_run;
 	struct timespec d_time;
 	struct timespec time;
+	int current_slot =  -1;
 
 //	clock_gettime(CLOCK_REALTIME, &(time));
 
@@ -553,16 +555,22 @@ void libbitfury_sendHashData(struct thr_info *thr, struct bitfury_device *bf, in
 			ms3_compute(atrvec);
 
 			/* Programming next value */
-			tm_i2c_set_oe(slot);
+			if(slot != current_slot) {
+				tm_i2c_clear_oe(slot);
+				tm_i2c_set_oe(slot);
+				current_slot = slot;
+			}
+//			spi_reset(1024);
 			spi_clear_buf(); spi_emit_break();
 			spi_emit_fasync(chip);
 			spi_emit_data(0x3000, (void*)&atrvec[0], 19*4);
 
 			spi_txrx(spi_gettxbuf(), spi_getrxbuf(), spi_getbufsz());
 			memcpy(newbuf, spi_getrxbuf() + 4 + chip, 17*4);
-			tm_i2c_clear_oe(slot);
+//			tm_i2c_clear_oe(slot);
 
-			d->job_switched = (newbuf[16] != oldbuf[16]);
+//			d->job_switched = ((newbuf[16] == 0 && oldbuf[16] == 0xffffffff) || (newbuf[16] == 0xffffffff && oldbuf[16] == 0));
+			d->job_switched = (newbuf[16] != oldbuf[16] );
 
 			d->old_num = 0;
 			d->future_num = 0;
