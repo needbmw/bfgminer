@@ -17,7 +17,10 @@
 #define GPIO_CLR *(gpio+10) // clears bits which are 1 ignores bits which are 0
 
 
-static int gpio_map[32] = { 2, 3, 4, 14, 15, 17, 18, 27, 22, 23, 24, 25, 8, 7};
+//static int gpio_map[32] = { 2, 3, 4, 14, 15, 17, 18, 27, 22, 23, 24, 25, 8, 7};
+static int gpio_map[] = { 7, 8, 25, 24, 23, 22, 27, 18, 17, 4, 3, 2 }; //new RasPi and rev 0b2 backplane only
+
+#define RACK_SLOTS (sizeof(gpio_map)/sizeof(int))
 
 static int tm_i2c_fd;
 
@@ -42,7 +45,7 @@ int tm_i2c_init() {
 //	else
 //		return 0;
 
-	for(i=0; i<14; i++) {
+	for(i=0; i<RACK_SLOTS; i++) {
 		gpio_inp(gpio_map[i]);
 		gpio_out(gpio_map[i]);
 //		gpio_set_alt(gpio_map[i], 0);
@@ -123,7 +126,7 @@ float tm_i2c_gettemp(unsigned char slot) {
 void tm_i2c_set_oe(unsigned char slot) {
 	int cnt, a=2;
 
-	if (slot < 0 || slot > 31) return;
+	if (slot < 0 || slot >= RACK_SLOTS) return;
 #if 0
 	tm_i2c_req(tm_i2c_fd, (TM_ADDR >> 1) + slot, TM_SET_OE, 0);
 #else
@@ -139,7 +142,7 @@ void tm_i2c_set_oe(unsigned char slot) {
 void tm_i2c_clear_oe(unsigned char slot) {
 	int i;
 
-	if (slot < 0 || slot > 31) return;
+	if (slot < 0 || slot >= RACK_SLOTS) return;
 #if 0
 	tm_i2c_req(tm_i2c_fd, (TM_ADDR >> 1) + slot, TM_SET_OE, 1);
 #else
