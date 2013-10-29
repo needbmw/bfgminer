@@ -146,7 +146,7 @@ void tm_i2c_clear_oe(unsigned char slot) {
 #if 0
 	tm_i2c_req(tm_i2c_fd, (TM_ADDR >> 1) + slot, TM_SET_OE, 1);
 #else
-	for(i=0; i<14; i++) {
+	for(i=0; i<RACK_SLOTS; i++) {
 		gpio_inp(gpio_map[i]);
 		gpio_out(gpio_map[i]);
 		gpio_set(gpio_map[i]);
